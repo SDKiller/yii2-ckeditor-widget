@@ -69,6 +69,17 @@ class CKEditor extends InputWidget
             $js[] = "dosamigos.ckEditorWidget.registerCsrfImageUploadHandler();";
         }
 
+        //@see http://docs.ckeditor.com/#!/guide/dev_file_upload-section-basic-configuration
+        //@see http://docs.ckeditor.com/#!/guide/dev_file_upload-section-editor-side-configuration
+        if (isset($this->clientOptions['uploadUrl']) || isset($this->clientOptions['imageUploadUrl'])) {
+            /* @var $request \yii\web\Request */
+            $request = \Yii::$app->request;
+            $js[] = 'CKEDITOR && CKEDITOR.instances[\'' . $id . '\'] && CKEDITOR.instances[\'' . $id . '\'].on( \'fileUploadRequest\', function(evt) {
+                        var xhr = evt.data.fileLoader.xhr;
+                        xhr.setRequestHeader( \'' . $request::CSRF_HEADER . '\', \'' . $request->getCsrfToken() . '\' );
+                    } );';
+        }
+
         $view->registerJs(implode("\n", $js));
     }
 }
